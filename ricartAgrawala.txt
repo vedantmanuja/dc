@@ -1,0 +1,95 @@
+n = int(input("Enter Number of Processes: "))
+
+queues = {}
+ok = {}
+for i in range(n):
+	queues[i+1] = []
+	ok[i+1] = []
+
+tasks = {}
+
+print("1. Request for CS \n2. Recieve Response \n3. Exit")
+
+
+def respond(i):
+	if(len(queues[i+1])==1):
+		ele = queues[i+1][0]
+		if(i+1 != ele):
+			ok[ele].append("OK")
+			print('Process {} send OK to {}'.format((i+1), ele))
+			queues[i+1] = []
+	elif(len(queues[i+1]) > 1):
+		for j in range(len(queues[i+1])):
+			ele = queues[i+1][0]
+			if(tasks[ele] > tasks[queues[i+1][j]]):
+				ele = queues[i+1][j]
+		if(i+1 != ele):
+			ok[ele].append("OK")
+			print('Process {} send OK to {}'.format((i+1), ele))
+			queues[i+1].remove(ele)
+
+while True:
+	a = int(input("\n\nEnter Choice: "))
+	match a:
+		case 1:
+			p = int(input("Enter Process Number: "))
+			t = int(input("Enter Timestamp: "))
+			tasks[p] = t
+			for i in range(n):
+				queues[i+1].append(p)
+			print("Queue: ", queues)
+
+
+		case 2:
+			for i in range(n):
+				respond(i)
+			for i in range(n):
+				if(len(ok[i+1])==n-1):
+					print("The process entering CS is ",(i+1))
+					queues[i+1].remove(i+1)
+					ok[i+1] = []
+					respond(i)
+			print("Queue: ", queues)
+
+		case 3:
+			break
+
+'''
+Enter Number of Processes: 5
+1. Request for CS 
+2. Recieve Response 
+3. Exit
+
+
+Enter Choice: 1
+Enter Process Number: 2
+Enter Timestamp: 7 
+Queue:  {1: [2], 2: [2], 3: [2], 4: [2], 5: [2]}
+
+
+Enter Choice: 1
+Enter Process Number: 3
+Enter Timestamp: 5
+Queue:  {1: [2, 3], 2: [2, 3], 3: [2, 3], 4: [2, 3], 5: [2, 3]}
+
+
+Enter Choice: 2
+Process 1 send OK to 3
+Process 2 send OK to 3
+Process 4 send OK to 3
+Process 5 send OK to 3
+The process entering CS is  3
+Process 3 send OK to 2
+Queue:  {1: [2], 2: [2], 3: [], 4: [2], 5: [2]}
+
+
+Enter Choice: 2
+Process 1 send OK to 2
+Process 4 send OK to 2
+Process 5 send OK to 2
+The process entering CS is  2
+Queue:  {1: [], 2: [], 3: [], 4: [], 5: []}
+
+
+Enter Choice: 3
+'''
